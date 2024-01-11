@@ -1,0 +1,20 @@
+.block {
+  --size: 50px;
+
+  width: var(--size);
+  height: var(--size);
+  mask-position: center;
+  mask-size: cover;
+  mask-repeat: no-repeat;
+  mask-composite: source-in;
+  -webkit-mask-position: center;
+  -webkit-mask-size: cover;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-composite: source-in;
+  -webkit-mask-composite: intersect;
+  content: url('../../assets/gory_vershiny_sumerki_1146019_1280x720.jpg');
+}
+
+.block--left-in {
+
+}
