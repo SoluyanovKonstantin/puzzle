@@ -1,6 +1,6 @@
 .block {
-  --size: 50px;
-
+  --size: 100px;
+  position: relative;
   width: var(--size);
   height: var(--size);
   mask-position: center;
@@ -12,9 +12,37 @@
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-composite: source-in;
   -webkit-mask-composite: intersect;
-  content: url('../../assets/gory_vershiny_sumerki_1146019_1280x720.jpg');
+  background-image: url('../../assets/gory_vershiny_sumerki_1146019_1280x720.jpg');
+
+  cursor: pointer;
 }
 
-.block--left-in {
+.block__circle {
+  position: absolute;
+  background-color: aqua;
+  border-radius: 50%;
+}
 
+.block__circle_left {
+  top: 50%;
+  left: 0;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.block__circle_right {
+  top: 50%;
+  right: 0;
+  transform: translateX(50%) translateY(-50%);
+}
+
+.block__circle_top {
+  top: 0;
+  right: 50%;
+  transform: translateX(50%) translateY(-50%);
+}
+
+.block__circle_bottom {
+  bottom: 0;
+  right: 50%;
+  transform: translateX(50%) translateY(50%);
 }

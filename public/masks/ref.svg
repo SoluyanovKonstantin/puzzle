@@ -8,7 +8,7 @@
    version="1.1"
    id="svg712"
    inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
-   sodipodi:docname="in-top.svg"
+   sodipodi:docname="ref.svg"
    xml:space="preserve"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -36,7 +36,13 @@
      id="defs709" /><g
      inkscape:label="Слой 1"
      inkscape:groupmode="layer"
-     id="layer1"><path
-       id="rect517"
+     id="layer1"><rect
        style="fill:#000000;stroke-width:9.23901;stroke-linejoin:round"
-       d="M 50.000307,7.7526217e-4 H 34.999672 A 10,10 0 0 1 24.999766,9.9944803 10,10 0 0 1 14.999859,7.7526217e-4 H 2.5826217e-4 V 49.99824 H 50.000307 Z" /></g></svg>
+       id="rect517"
+       width="49.99773"
+       height="50.00042"
+       x="0.0014102401"
+       y="-0.00065681722" /><path
+       id="path342"
+       style="fill:#aa0000;stroke-width:9.23901;stroke-linejoin:round"
+       d="M 9.9954368,25 A 10,10 0 0 1 -0.00455786,35 10,10 0 0 1 -10.004558,25 10,10 0 0 1 -0.00455786,15 10,10 0 0 1 9.9954368,25 Z" /></g></svg>
