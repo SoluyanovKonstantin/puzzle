@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from 'react';
+import { FC, useRef } from 'react';
 import style from './PuzzlePiece.module.css';
 
 export type TPuzzlePieceSide = 'in' | 'out' | 'none';
@@ -19,6 +19,10 @@ const PuzzlePiece: FC<TPuzzlePieceProps> = ({ i, j, size, left, right, top, bott
   const maskImage: string[] = [];
   const urlToAssets = '/masks/';
   const circleRadius = size / 5;
+  const randomCoordinates = {
+    top: `${Math.round(Math.random() * (79)) + 10}%`,
+    left: `${Math.round(Math.random() * (79)) + 10}%`,
+  }
   const sides: Record<string, TPuzzlePieceSide> = { left, right, top, bottom }
   Object.keys(sides).forEach( key => {
     if (sides[key] === 'in') {
@@ -26,51 +30,46 @@ const PuzzlePiece: FC<TPuzzlePieceProps> = ({ i, j, size, left, right, top, bott
     }
   } );
 
-  const omMouseMove = (event: React.MouseEvent) => { // (1) отследить нажатие
+  const onMouseMove = (event: React.MouseEvent) => {
 
-    const ball = event.currentTarget as HTMLElement;
-    ball.ondragstart = () => {
+    const element = event.currentTarget as HTMLElement;
+    element.ondragstart = () => {
       return false;
     };
     event.preventDefault();
-    // (2) подготовить к перемещению:
-    // разместить поверх остального содержимого и в абсолютных координатах
-    ball.style.position = 'absolute';
-    ball.style.zIndex = '1000';
-    // переместим в body, чтобы мяч был точно не внутри position:relative
-    // и установим абсолютно спозиционированный мяч под курсор
+    element.style.position = 'absolute';
+    element.style.zIndex = '10003';
+    htmlElementWithCirclesRef.current!.style.zIndex = '10002'
   
-    moveAt(event.pageX, event.pageY);
-  
-    // передвинуть мяч под координаты курсора
-    // и сдвинуть на половину ширины/высоты для центрирования
-    function moveAt(pageX: number, pageY: number) {
-      const x = pageX - ball.offsetWidth / 2 + 'px';
-      const y = pageY - ball.offsetHeight / 2 + 'px';
+    const moveAt = (pageX: number, pageY: number) => {
+      const x = pageX - element.offsetWidth / 2 + 'px';
+      const y = pageY - element.offsetHeight / 2 + 'px';
       if (htmlElementWithCirclesRef.current) { htmlElementWithCirclesRef.current.style.top = y };
       if (htmlElementWithCirclesRef.current) { htmlElementWithCirclesRef.current.style.left = x };
-      ball.style.left = x;
-      ball.style.top = y;
+      element.style.left = x;
+      element.style.top = y;
     }
+
+    moveAt(event.pageX, event.pageY);
   
-    function onMouseMove(event: MouseEvent) {
+    const onMouseMove = (event: MouseEvent) => {
       moveAt(event.pageX, event.pageY);
     }
   
-    // (3) перемещать по экрану
     document.addEventListener('mousemove', onMouseMove);
   
-    // (4) положить мяч, удалить более ненужные обработчики событий
-    ball.onmouseup = function() {
+    document.onmouseup = () => {
       document.removeEventListener('mousemove', onMouseMove);
-      ball.onmouseup = null;
+      element.onmouseup = null;
+      element.style.zIndex = '10001';
+      htmlElementWithCirclesRef.current!.style.zIndex = '10000'
     };
   
   };
 
   return (
     <>
-      <div onMouseDown={omMouseMove} className={style.block} style={ { 
+      <div onMouseDown={onMouseMove} className={style.block} style={ { 
         maskImage: maskImage.join(', '), 
         WebkitMaskImage: maskImage.join(', '), 
         backgroundImage: `url(${image})`,
@@ -78,10 +77,12 @@ const PuzzlePiece: FC<TPuzzlePieceProps> = ({ i, j, size, left, right, top, bott
         backgroundPositionY: - size * i,
         width: size,
         height: size,
+        top: randomCoordinates.top,
+        left: randomCoordinates.left,
         position: 'absolute',
-        zIndex: 100000,
+        zIndex: 10001,
       } } />
-      <div ref={htmlElementWithCirclesRef} style={{ width: size, height: size, position: 'absolute' }}>
+      <div ref={htmlElementWithCirclesRef} style={{ width: size, height: size, position: 'absolute', top: randomCoordinates.top, left: randomCoordinates.left, zIndex: 10000 }}>
         {left === 'out' && 
         <div className={[style.block__circle, style.block__circle_left].join(' ')} style={{ 
           width: size / 2.5, 

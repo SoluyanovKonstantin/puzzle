@@ -29,9 +29,13 @@ function Editor() {
         const image = new Image();
         if (e.target) {
           image.src = fileReader.result as string;
-          setUrl(fileReader.result as string);
           image.onload = () => {
             sizeRef.current = gcd(image.width, image.height);
+            if (sizeRef.current < 4) {
+              console.error('error');
+              return;
+            }
+            setUrl(fileReader.result as string);
             if(generateEasyPuzzleRef.current && generateMiddlePuzzleRef.current && generateHardPuzzleRef.current) {
               generateHardPuzzleRef.current.style.display = generateMiddlePuzzleRef.current.style.display = generateEasyPuzzleRef.current.style.display = 'block';
               generateEasyPuzzleRef.current.dataset.columns =''+ (image.width / sizeRef.current);
@@ -82,7 +86,6 @@ function Editor() {
   const generatePuzzle = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setPuzzlePieces([]);
     const target = event.currentTarget;
-    console.log(target.dataset.puzzleType);
     const pieces: ReactElement[] = [];
     if (target.dataset.rows && target.dataset.columns && target.dataset.puzzleType) {
 
@@ -107,10 +110,10 @@ function Editor() {
   return (
     <>
       <input type="file" onChange={onLoadImage} />
-      <img src={url} alt="puzzle" />
-      <button ref={generateEasyPuzzleRef} data-puzzle-type='1' onClick={generatePuzzle} style={{display: 'none'}}>generateBigPuzzle</button>
+      <img width='200' src={url} alt="puzzle" />
+      <button ref={generateEasyPuzzleRef} data-puzzle-type='1' onClick={generatePuzzle} style={{display: 'none'}}>generateEasyPuzzle</button>
       <button ref={generateMiddlePuzzleRef} data-puzzle-type='2' onClick={generatePuzzle} style={{display: 'none'}}>generateMiddlePuzzle</button>
-      <button ref={generateHardPuzzleRef} data-puzzle-type='4' onClick={generatePuzzle} style={{display: 'none'}}>generateLittlePuzzle</button>
+      <button ref={generateHardPuzzleRef} data-puzzle-type='4' onClick={generatePuzzle} style={{display: 'none'}}>generateHardPuzzle</button>
       {puzzlePieces}
     </>
   );
