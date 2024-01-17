@@ -3,6 +3,7 @@ import "./Editor.css";
 import PuzzlePiece, {
   TPuzzlePieceProps,
 } from "../../components/PuzzlePiece/PuzzlePiece";
+import Desk from "../../components/desk/Desk";
 
 function gcd(a: number, b: number): number {
   if (b === 0) {
@@ -17,8 +18,18 @@ function Editor() {
   const generateEasyPuzzleRef: React.MutableRefObject<HTMLButtonElement | null> = useRef(null);
   const generateMiddlePuzzleRef: React.MutableRefObject<HTMLButtonElement | null> = useRef(null);
   const generateHardPuzzleRef: React.MutableRefObject<HTMLButtonElement | null> = useRef(null);
+  const deskSizes = useRef({
+    width: 0,
+    height: 0,
+    puzzlesCountByXCoord: 0,
+    puzzlesCountByYCoord: 0
+  });
+  const currentBlockCoordinates = {
+    top: 0,
+    left: 0
+  };
   const [url, setUrl] = useState("");
-  const [puzzlePieces, setPuzzlePieces] = useState<ReactElement[]>([]);
+  const [puzzlePieces, setPuzzlePieces] = useState<Omit<TPuzzlePieceProps, "onPutPuzzle">[]>([]);
 
   const onLoadImage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const fileReader = new FileReader();
@@ -31,6 +42,7 @@ function Editor() {
           image.src = fileReader.result as string;
           image.onload = () => {
             sizeRef.current = gcd(image.width, image.height);
+
             if (sizeRef.current < 4) {
               console.error('error');
               return;
@@ -54,13 +66,13 @@ function Editor() {
   };
 
   const generateMatrix = (rows: number, cols: number, size: number) => {
-    let matrix: TPuzzlePieceProps[][] = [];
+    let matrix: Omit<TPuzzlePieceProps, 'onPutPuzzle'>[][] = [];
 
     for (let i = 0; i < rows; i++) {
       matrix[i] = [];
 
       for (let j = 0; j < cols; j++) {
-        const piece: TPuzzlePieceProps = {
+        const piece: Omit<TPuzzlePieceProps, 'onPutPuzzle'> = {
           i,
           j,
           size,
@@ -75,6 +87,10 @@ function Editor() {
                 ? "out"
                 : "in"
               : "none",
+          positionOnTheDesk: {
+            top: null,
+            left: null
+          }
         };
 
         matrix[i][j] = piece;
@@ -86,19 +102,22 @@ function Editor() {
   const generatePuzzle = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setPuzzlePieces([]);
     const target = event.currentTarget;
-    const pieces: ReactElement[] = [];
+    const pieces: Omit<TPuzzlePieceProps, "onPutPuzzle">[] = [];
     if (target.dataset.rows && target.dataset.columns && target.dataset.puzzleType) {
 
       const matrix = generateMatrix(+target.dataset.rows, +target.dataset.columns, sizeRef.current / +target.dataset.puzzleType);
 
+      deskSizes.current = {
+        width: sizeRef.current * +target.dataset.columns,
+        height: sizeRef.current * +target.dataset.rows,
+        puzzlesCountByXCoord: +target.dataset.columns,
+        puzzlesCountByYCoord: +target.dataset.rows
+      }
+
       matrix.forEach((arr) =>
         arr.forEach((piece) => {
           pieces.push(
-            <PuzzlePiece
-              key={"" + piece.i + "" + piece.j}
-              {...piece}
-              image={url}
-            />
+            piece
           );
         })
       );
@@ -111,10 +130,24 @@ function Editor() {
     <>
       <input type="file" onChange={onLoadImage} />
       <img width='200' src={url} alt="puzzle" />
-      <button ref={generateEasyPuzzleRef} data-puzzle-type='1' onClick={generatePuzzle} style={{display: 'none'}}>generateEasyPuzzle</button>
-      <button ref={generateMiddlePuzzleRef} data-puzzle-type='2' onClick={generatePuzzle} style={{display: 'none'}}>generateMiddlePuzzle</button>
-      <button ref={generateHardPuzzleRef} data-puzzle-type='4' onClick={generatePuzzle} style={{display: 'none'}}>generateHardPuzzle</button>
-      {puzzlePieces}
+      <button ref={generateEasyPuzzleRef} data-puzzle-type='1' onClick={generatePuzzle} style={{display: 'none'}}>Сгенерировать легкий паззл</button>
+      <button ref={generateMiddlePuzzleRef} data-puzzle-type='2' onClick={generatePuzzle} style={{display: 'none'}}>Сгенерировать средний паззл</button>
+      <button ref={generateHardPuzzleRef} data-puzzle-type='4' onClick={generatePuzzle} style={{display: 'none'}}>Сгенерировать сложный паззл</button>
+      {puzzlePieces.map(piece => <PuzzlePiece
+              key={"" + piece.i + "" + piece.j}
+              {...piece}
+              onPutPuzzle ={() => {
+                const newPuzzlePieces: Omit<TPuzzlePieceProps, "onPutPuzzle">[] = structuredClone(puzzlePieces);
+                const newPuzzlePiece = newPuzzlePieces.find(p => p.i === piece.i && p.j === piece.j);
+                newPuzzlePiece!.positionOnTheDesk = structuredClone(currentBlockCoordinates);
+                setPuzzlePieces(newPuzzlePieces);
+              }}
+              image={url}
+            />)}
+      {puzzlePieces.length && <Desk {...deskSizes.current} onChangedBlock={(el: HTMLElement) => {
+        currentBlockCoordinates.top = +el.offsetTop;
+        currentBlockCoordinates.left = el.offsetLeft;
+      }} />}
     </>
   );
 }

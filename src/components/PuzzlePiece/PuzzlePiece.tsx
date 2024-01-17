@@ -1,4 +1,4 @@
-import { FC, useRef } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import style from './PuzzlePiece.module.css';
 
 export type TPuzzlePieceSide = 'in' | 'out' | 'none';
@@ -11,24 +11,40 @@ export type TPuzzlePieceProps = {
   right: TPuzzlePieceSide,
   top: TPuzzlePieceSide,
   bottom: TPuzzlePieceSide,
-  image?: string
+  onPutPuzzle: () => void,
+  image?: string,
+  positionOnTheDesk?: {
+    left: number | null,
+    top: number | null
+  }
 }
 
-const PuzzlePiece: FC<TPuzzlePieceProps> = ({ i, j, size, left, right, top, bottom, image }) => {
+const PuzzlePiece: FC<TPuzzlePieceProps> = ({ i, j, size, left, right, top, bottom, image, positionOnTheDesk, onPutPuzzle }) => {
   const htmlElementWithCirclesRef: React.MutableRefObject<HTMLDivElement | null> = useRef(null);
+  const htmlPuzzleBlockElementRef: React.MutableRefObject<HTMLDivElement | null> = useRef(null);
   const maskImage: string[] = [];
   const urlToAssets = '/masks/';
   const circleRadius = size / 5;
-  const randomCoordinates = {
+  const randomCoordinates = useRef({
     top: `${Math.round(Math.random() * (79)) + 10}%`,
     left: `${Math.round(Math.random() * (79)) + 10}%`,
-  }
+  })
   const sides: Record<string, TPuzzlePieceSide> = { left, right, top, bottom }
   Object.keys(sides).forEach( key => {
     if (sides[key] === 'in') {
       maskImage.push( `url(${urlToAssets}${sides[key]}-${key}.svg)`);
     }
   } );
+
+  useEffect(() => {
+    if (positionOnTheDesk?.top) {
+      htmlElementWithCirclesRef.current!.style.left = ''+positionOnTheDesk.left;
+      htmlElementWithCirclesRef.current!.style.top = ''+positionOnTheDesk.top;
+
+      htmlPuzzleBlockElementRef.current!.style.left = ''+positionOnTheDesk.left;
+      htmlPuzzleBlockElementRef.current!.style.top = ''+positionOnTheDesk.top;
+    }
+  }, [positionOnTheDesk])
 
   const onMouseMove = (event: React.MouseEvent) => {
 
@@ -38,8 +54,8 @@ const PuzzlePiece: FC<TPuzzlePieceProps> = ({ i, j, size, left, right, top, bott
     };
     event.preventDefault();
     element.style.position = 'absolute';
-    element.style.zIndex = '10003';
-    htmlElementWithCirclesRef.current!.style.zIndex = '10002'
+    element.style.zIndex = '10001';
+    htmlElementWithCirclesRef.current!.style.zIndex = '10001'
   
     const moveAt = (pageX: number, pageY: number) => {
       const x = pageX - element.offsetWidth / 2 + 'px';
@@ -61,15 +77,17 @@ const PuzzlePiece: FC<TPuzzlePieceProps> = ({ i, j, size, left, right, top, bott
     document.onmouseup = () => {
       document.removeEventListener('mousemove', onMouseMove);
       element.onmouseup = null;
-      element.style.zIndex = '10001';
+      element.style.zIndex = '10000';
       htmlElementWithCirclesRef.current!.style.zIndex = '10000'
+
+      onPutPuzzle();
     };
   
   };
 
   return (
     <>
-      <div onMouseDown={onMouseMove} className={style.block} style={ { 
+      <div ref={htmlPuzzleBlockElementRef} onMouseDown={onMouseMove} className={style.block} style={ { 
         maskImage: maskImage.join(', '), 
         WebkitMaskImage: maskImage.join(', '), 
         backgroundImage: `url(${image})`,
@@ -77,12 +95,16 @@ const PuzzlePiece: FC<TPuzzlePieceProps> = ({ i, j, size, left, right, top, bott
         backgroundPositionY: - size * i,
         width: size,
         height: size,
-        top: randomCoordinates.top,
-        left: randomCoordinates.left,
+        top: positionOnTheDesk?.top ?? randomCoordinates.current.top,
+        left: positionOnTheDesk?.left ?? randomCoordinates.current.left,
         position: 'absolute',
-        zIndex: 10001,
+        zIndex: 10000,
       } } />
-      <div ref={htmlElementWithCirclesRef} style={{ width: size, height: size, position: 'absolute', top: randomCoordinates.top, left: randomCoordinates.left, zIndex: 10000 }}>
+      <div ref={htmlElementWithCirclesRef} className={style.block__wrapCircle} style={{ 
+        width: size, 
+        height: size, 
+        top: positionOnTheDesk?.top ?? randomCoordinates.current.top, 
+        left: positionOnTheDesk?.left ?? randomCoordinates.current.left }}>
         {left === 'out' && 
         <div className={[style.block__circle, style.block__circle_left].join(' ')} style={{ 
           width: size / 2.5, 

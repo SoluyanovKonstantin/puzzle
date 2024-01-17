@@ -13,7 +13,6 @@
   -webkit-mask-composite: source-in;
   -webkit-mask-composite: intersect;
   background-image: url('../../assets/gory_vershiny_sumerki_1146019_1280x720.jpg');
-
   cursor: pointer;
 }
 
@@ -45,4 +44,10 @@
   bottom: 0;
   right: 50%;
   transform: translateX(50%) translateY(50%);
+}
+
+.block__wrapCircle {
+  pointer-events: none;
+  position: absolute;
+  z-index: 10000;
 }
